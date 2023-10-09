@@ -1,66 +1,27 @@
-## Foundry
+# Fund Me
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A decentralized app written in Solidity, based on the fundraising platform of GoFundMe.
 
-Foundry consists of:
+## ⚒️ Built with Foundry
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+This project is built with [Foundry](https://github.com/foundry-rs/foundry) a portable and modular toolkit for Ethereum application development.
 
-## Documentation
+To build the project:
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```
+forge build
 ```
 
-### Test
+## 🧪 Running tests
 
-```shell
-$ forge test
+To run against a local Anvil Ethereum node:
+
+```
+forge test
 ```
 
-### Format
+To run against a forked environment (e.g. a forked Sepolia testnet):
 
-```shell
-$ forge fmt
 ```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+forge test --fork-url <sepolia_rpc_url>
 ```
