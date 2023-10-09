@@ -11,7 +11,7 @@ contract FundMeTest is Test {
 
   function setUp() external {
     DeployFundMe deployFundMe = new DeployFundMe();
-    fundMe = deployFundMe.run();
+    (fundMe, ) = deployFundMe.run();
   }
 
   function testMinimumDollarsFive() public {
