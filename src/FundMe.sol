@@ -1,88 +1,87 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import { PriceConverter } from "./PriceConverter.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {PriceConverter} from "./PriceConverter.sol";
 
-error FundMe__NotOwner();
-
+/**
+ * @title A fundraising smart contract
+ * @author howellsy
+ * @notice Only the owner can withdraw funds
+ * @dev Uses a Chainlink price feed to convert ETH to USD
+ */
 contract FundMe {
-  using PriceConverter for uint256;
+    using PriceConverter for uint256;
 
-  mapping(address => uint256) private s_addressToAmountFunded;
-  address[] private s_funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] private s_funders;
+    AggregatorV3Interface private s_priceFeed;
 
-  address private immutable i_owner;
-  uint256 private constant MINIMUM_USD = 5 * 10 ** 18;
-  AggregatorV3Interface private s_priceFeed;
+    address private immutable i_owner;
+    uint256 private constant MINIMUM_USD = 5 * 10 ** 18;
 
-  constructor(address priceFeed) {
-    i_owner = msg.sender;
-    s_priceFeed = AggregatorV3Interface(priceFeed);
-  }
+    error FundMe__NotOwner();
 
-  function fund() public payable {
-    require(
-      msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
-      "You need to send more ETH!"
-    );
-    s_addressToAmountFunded[msg.sender] += msg.value;
-    s_funders.push(msg.sender);
-  }
-
-  modifier onlyOwner() {
-    if (msg.sender != i_owner) revert FundMe__NotOwner();
-    _;
-  }
-
-  function getVersion() public view returns (uint256) {
-    return s_priceFeed.version();
-  }
-
-  function withdraw() public onlyOwner {
-    uint256 fundersLength = s_funders.length;
-
-    for (uint256 funderIndex = 0; funderIndex < fundersLength; funderIndex++) {
-      address funder = s_funders[funderIndex];
-      s_addressToAmountFunded[funder] = 0;
+    modifier onlyOwner() {
+        if (msg.sender != i_owner) revert FundMe__NotOwner();
+        _;
     }
 
-    s_funders = new address[](0);
+    constructor(address priceFeed) {
+        i_owner = msg.sender;
+        s_priceFeed = AggregatorV3Interface(priceFeed);
+    }
 
-    (bool callSuccess, ) = payable(msg.sender).call{
-      value: address(this).balance
-    }("");
+    receive() external payable {
+        fund();
+    }
 
-    require(callSuccess, "Call failed");
-  }
+    fallback() external payable {
+        fund();
+    }
 
-  fallback() external payable {
-    fund();
-  }
+    function fund() public payable {
+        require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to send more ETH!");
+        s_addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
+    }
 
-  receive() external payable {
-    fund();
-  }
+    function withdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
 
-  /**
-   * View/Pure functions (Getters)
-   */
+        for (uint256 funderIndex = 0; funderIndex < fundersLength; funderIndex++) {
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
 
-  function getAddressToAmountFunded(
-    address fundingAddress
-  ) external view returns (uint256) {
-    return s_addressToAmountFunded[fundingAddress];
-  }
+        s_funders = new address[](0);
 
-  function getFunder(uint256 index) external view returns (address) {
-    return s_funders[index];
-  }
+        (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
 
-  function getOwner() external view returns (address) {
-    return i_owner;
-  }
+        require(callSuccess, "Call failed");
+    }
 
-  function getMinimumUsd() external pure returns (uint256) {
-    return MINIMUM_USD;
-  }
+    /**
+     * View/Pure functions (Getters)
+     */
+
+    function getVersion() public view returns (uint256) {
+        return s_priceFeed.version();
+    }
+
+    function getAddressToAmountFunded(address fundingAddress) external view returns (uint256) {
+        return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getFunder(uint256 index) external view returns (address) {
+        return s_funders[index];
+    }
+
+    function getOwner() external view returns (address) {
+        return i_owner;
+    }
+
+    function getMinimumUsd() external pure returns (uint256) {
+        return MINIMUM_USD;
+    }
 }
