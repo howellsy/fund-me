@@ -23,6 +23,7 @@ contract FundMe {
     event Funded(address indexed funder, uint256 value);
 
     error FundMe__NotOwner(address sender);
+    error FundMe__TransferFailed();
 
     modifier onlyOwner() {
         if (msg.sender != i_owner) revert FundMe__NotOwner(msg.sender);
@@ -63,7 +64,7 @@ contract FundMe {
 
         (bool callSuccess,) = payable(msg.sender).call{value: balance}("");
 
-        require(callSuccess, "Call failed");
+        if (!callSuccess) revert FundMe__TransferFailed();
     }
 
     /**
