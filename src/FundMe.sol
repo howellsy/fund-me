@@ -22,10 +22,10 @@ contract FundMe {
 
     event Funded(address indexed funder, uint256 value);
 
-    error FundMe__NotOwner();
+    error FundMe__NotOwner(address sender);
 
     modifier onlyOwner() {
-        if (msg.sender != i_owner) revert FundMe__NotOwner();
+        if (msg.sender != i_owner) revert FundMe__NotOwner(msg.sender);
         _;
     }
 
