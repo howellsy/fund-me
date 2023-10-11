@@ -20,6 +20,8 @@ contract FundMe {
     address private immutable i_owner;
     uint256 private constant MINIMUM_USD = 5 * 10 ** 18;
 
+    event Funded(address indexed funder, uint256 value);
+
     error FundMe__NotOwner();
 
     modifier onlyOwner() {
@@ -44,6 +46,8 @@ contract FundMe {
         require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to send more ETH!");
         s_addressToAmountFunded[msg.sender] += msg.value;
         s_funders.push(msg.sender);
+
+        emit Funded(msg.sender, msg.value);
     }
 
     function withdraw() public onlyOwner {
