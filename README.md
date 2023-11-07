@@ -1,6 +1,6 @@
 # Fund Me
 
-A decentralized app written in Solidity, based on the fundraising platform of GoFundMe.
+A decentralized app written in Solidity, based on the fundraising platform of GoFundMe, leveraging Chainlink price feeds.
 
 ## ⚒️ Built with Foundry
 
